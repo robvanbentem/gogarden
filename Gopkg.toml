@@ -1,0 +1,5 @@
+required = [
+    "github.com/eclipse/paho.mqtt.golang",
+    "github.com/BurntSushi/toml",
+    "github.com/op/go-logging"
+]

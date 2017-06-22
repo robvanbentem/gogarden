@@ -1,0 +1,11 @@
+# toml formatted, Tom's Obvious, Minimal Language
+
+DevicePath = "/sys/bus/w1/devices/"
+MonitorInterval = "1s"
+LogFile = "gogarden.log"
+
+[MQTT]
+Broker = "tcp://localhost:1883"
+Name = "GoGarden"
+Path = "/mqtt/broadcast/path/%s" # %s is replaced by the sensor type
+QOS = 2
