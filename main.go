@@ -16,13 +16,13 @@ func main() {
 		common.Log.Fatal("Could not connect to MQTT broker")
 		os.Exit(1)
 	}
-	common.Log.Debug("Connected to MQTT broker")
 	defer net.Disconnect()
+	common.Log.Info("Connected to MQTT broker")
 
 	go net.ListenForMessages()
 	go sensor.MonitorTemperatures()
 
-	common.Log.Debug("Monitoring..")
+	common.Log.Info("Monitoring..")
 	for {
 		time.Sleep(time.Second)
 	}

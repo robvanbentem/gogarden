@@ -59,7 +59,7 @@ Loop:
 			token := client.Publish(fmt.Sprintf(common.ConfigRoot.MQTT.Path, m.Path), common.ConfigRoot.MQTT.QOS, false, m.Message)
 			token.Wait()
 			if token.Error() != nil {
-				common.Log.Warning("Error publishing message, breaking loop.")
+				common.Log.Error("Error publishing message: " + token.Error().Error())
 			}
 		case <-exit:
 			break Loop
