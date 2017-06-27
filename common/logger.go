@@ -21,6 +21,7 @@ func InitLogger() {
 		panic("Could not create LogFile, check permissions and Config.toml")
 	}
 
+	file.Seek(0, 2)
 	filebackend := logging.NewLogBackend(file, "", 0)
 	clibackend := logging.NewLogBackend(os.Stderr, "", 0)
 

@@ -6,16 +6,17 @@ import (
 	"os"
 	"bufio"
 	"strconv"
-	"gogarden/net"
 	"time"
 	"encoding/json"
+	"gogarden/net"
 	"gogarden/common"
 )
 
-type TempReadout struct {
+type DS18B20Message struct {
 	DeviceID    string
 	Temperature float64
 	Date        string
+	Type        string
 }
 
 func MonitorTemperatures() {
@@ -34,7 +35,7 @@ func reportTemperatures() {
 	dir := common.ConfigRoot.DevicePath + "/"
 	files, _ := ioutil.ReadDir(dir)
 
-	readouts := make([]TempReadout, 0)
+	readouts := make([]DS18B20Message, 0)
 
 	for _, v := range files {
 		if strings.Contains(v.Name(), "w1_bus_master") {
@@ -61,7 +62,7 @@ func reportTemperatures() {
 				name := v.Name()[len(v.Name())-6:]
 				temp := float64(t / 1000.0)
 
-				readouts = append(readouts, TempReadout{name, temp, time.Now().Format(time.RFC3339)})
+				readouts = append(readouts, DS18B20Message{name, temp, time.Now().Format(time.RFC3339), "DS18B20"})
 			}
 		}
 
