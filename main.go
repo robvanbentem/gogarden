@@ -6,23 +6,24 @@ import (
 	"gogarden/sensor"
 	"time"
 	"os"
+	"gocmn"
 )
 
 func main() {
 	common.LoadConfig()
-	common.InitLogger()
+	gocmn.InitLogger(common.ConfigRoot.LogFile)
 
 	if err := net.Connect(); err != nil {
-		common.Log.Fatal("Could not connect to MQTT broker")
+		gocmn.Log.Fatal("Could not connect to MQTT broker")
 		os.Exit(1)
 	}
 	defer net.Disconnect()
-	common.Log.Info("Connected to MQTT broker")
+	gocmn.Log.Info("Connected to MQTT broker")
 
 	go net.ListenForMessages()
 	go sensor.MonitorTemperatures()
 
-	common.Log.Info("Monitoring..")
+	gocmn.Log.Info("Monitoring..")
 	for {
 		time.Sleep(time.Second)
 	}

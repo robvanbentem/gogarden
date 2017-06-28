@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"gogarden/net"
 	"gogarden/common"
+	"gocmn"
 )
 
 type DS18B20Message struct {
@@ -44,7 +45,7 @@ func reportTemperatures() {
 
 		file, err := os.Open(dir + v.Name() + "/w1_slave")
 		if err != nil {
-			common.Log.Error("Error reading device: " + err.Error())
+			gocmn.Log.Error("Error reading device: " + err.Error())
 			continue
 		}
 
@@ -56,7 +57,7 @@ func reportTemperatures() {
 				ts := text[p+2:]
 				t, err := strconv.ParseFloat(ts, 64)
 				if err != nil {
-					common.Log.Error("Could not parse temperature: " + err.Error())
+					gocmn.Log.Error("Could not parse temperature: " + err.Error())
 				}
 
 				name := v.Name()[len(v.Name())-6:]
@@ -67,14 +68,14 @@ func reportTemperatures() {
 		}
 
 		if err := scanner.Err(); err != nil {
-			common.Log.Error("Error while reading device: " + err.Error())
+			gocmn.Log.Error("Error while reading device: " + err.Error())
 		}
 
 		file.Close()
 	}
 
 	for _, temp := range readouts {
-		common.Log.Infof("Reporting temperature for %s: %.2f", temp.DeviceID, temp.Temperature)
+		gocmn.Log.Infof("Reporting temperature for %s: %.2f", temp.DeviceID, temp.Temperature)
 		msg, _ := json.Marshal(temp)
 		*net.GetCommsChan() <- net.Message{"temp", msg}
 	}

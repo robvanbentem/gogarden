@@ -4,6 +4,7 @@ import (
 	"fmt"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"gogarden/common"
+	"gocmn"
 )
 
 type Message struct {
@@ -18,8 +19,6 @@ var exit chan byte
 
 //define a function for the default message handler
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
-	fmt.Printf("TOPIC: %s\n", msg.Topic())
-	fmt.Printf("MSG: %s\n", msg.Payload())
 }
 
 func Connect() error {
@@ -59,7 +58,7 @@ Loop:
 			token := client.Publish(fmt.Sprintf(common.ConfigRoot.MQTT.Path, m.Path), common.ConfigRoot.MQTT.QOS, false, m.Message)
 			token.Wait()
 			if token.Error() != nil {
-				common.Log.Error("Error publishing message: " + token.Error().Error())
+				gocmn.Log.Error("Error publishing message: " + token.Error().Error())
 			}
 		case <-exit:
 			break Loop
