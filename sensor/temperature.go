@@ -76,7 +76,10 @@ func reportTemperatures() {
 
 	for _, temp := range readouts {
 		gocmn.Log.Infof("Reporting temperature for %s: %.2f", temp.DeviceID, temp.Temperature)
-		msg, _ := json.Marshal(temp)
+		msg, err := json.Marshal(temp)
+		if err != nil {
+			gocmn.Log.Error("Could not encode json: " + err.Error())
+		}
 		*net.GetCommsChan() <- net.Message{"temp", msg}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"gogarden/common"
 	"gocmn"
+	"time"
 )
 
 type Message struct {
@@ -37,7 +38,7 @@ func Connect() error {
 		return token.Error()
 	}
 
-	comms = make(chan Message, 10)
+	comms = make(chan Message)
 	exit = make(chan byte)
 
 	return nil
@@ -55,12 +56,9 @@ Loop:
 	for {
 		select {
 		case m := <-comms:
-			token := client.Publish(fmt.Sprintf(common.ConfigRoot.MQTT.Path, m.Path), common.ConfigRoot.MQTT.QOS, false, m.Message)
-			token.Wait()
-			if token.Error() != nil {
-				gocmn.Log.Error("Error publishing message: " + token.Error().Error())
-			}
+			go publishMessage(m)
 		case <-exit:
+			gocmn.Log.Debug("Stop listening for messages")
 			break Loop
 		}
 	}
@@ -68,4 +66,14 @@ Loop:
 
 func GetCommsChan() *chan Message {
 	return &comms
+}
+
+func publishMessage(m Message) {
+	gocmn.Log.Debug("Publising message..")
+	token := client.Publish(fmt.Sprintf(common.ConfigRoot.MQTT.Path, m.Path), common.ConfigRoot.MQTT.QOS, false, m.Message)
+	token.Wait()
+	gocmn.Log.Debug("Message published")
+	if token.Error() != nil {
+		gocmn.Log.Error("Error publishing message: " + token.Error().Error())
+	}
 }
