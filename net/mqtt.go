@@ -5,7 +5,6 @@ import (
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"gogarden/common"
 	"gocmn"
-	"time"
 )
 
 type Message struct {
@@ -38,7 +37,7 @@ func Connect() error {
 		return token.Error()
 	}
 
-	comms = make(chan Message)
+	comms = make(chan Message, 32)
 	exit = make(chan byte)
 
 	return nil
