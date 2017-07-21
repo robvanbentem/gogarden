@@ -13,6 +13,8 @@ func main() {
 	common.LoadConfig()
 	gocmn.InitLogger(common.ConfigRoot.LogFile)
 
+	net.Setup()
+
 	if err := net.Connect(); err != nil {
 		gocmn.Log.Fatal("Could not connect to MQTT broker")
 		os.Exit(1)

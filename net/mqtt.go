@@ -5,6 +5,8 @@ import (
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"gogarden/common"
 	"gocmn"
+	"time"
+	"errors"
 )
 
 type Message struct {
@@ -17,11 +19,34 @@ var client MQTT.Client
 var comms chan Message
 var exit chan byte
 
+var connecting = false
+
 //define a function for the default message handler
 var f MQTT.MessageHandler = func(client MQTT.Client, msg MQTT.Message) {
 }
 
+func Setup() {
+	comms = make(chan Message, 32)
+	exit = make(chan byte)
+}
+
 func Connect() error {
+
+	if connecting {
+		for !connecting {
+			gocmn.Log.Debug("Already connecting, waiting..")
+			time.Sleep(1 * time.Second)
+		}
+
+		if client.IsConnected() {
+			return nil
+		} else {
+			return errors.New("MQTT client is not connected")
+		}
+	}
+
+	connecting = true
+
 	cfg := common.ConfigRoot.MQTT
 
 	opts := MQTT.NewClientOptions().AddBroker(cfg.Broker)
@@ -33,12 +58,11 @@ func Connect() error {
 	token := client.Connect()
 	token.Wait()
 
+	connecting = false
+
 	if token.Error() != nil {
 		return token.Error()
 	}
-
-	comms = make(chan Message, 32)
-	exit = make(chan byte)
 
 	return nil
 }
@@ -55,9 +79,16 @@ Loop:
 	for {
 		select {
 		case m := <-comms:
+			if client.IsConnected() == false {
+				gocmn.Log.Warning("MQTT disconnected, trying to reconnect..")
+				if err := Connect(); err != nil {
+					gocmn.Log.Error("Client not connected, cannot publish message")
+					return
+				}
+			}
 			go publishMessage(m)
 		case <-exit:
-			gocmn.Log.Debug("Stop listening for messages")
+			gocmn.Log.Info("Stop listening for messages")
 			break Loop
 		}
 	}
